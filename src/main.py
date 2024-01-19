@@ -5,9 +5,45 @@ class Calc:
 
     def pse(self):
         try:
-            return self.n()
+            return self.mul()
         except Exception as e:
             return f"invalid: {e}"
+
+    def mul(self):
+        out = self.add()
+        while self.i < len(self.ex):
+            if self.ex[self.i] == '*':
+                self.i += 1
+                out *= self.add()
+            elif self.ex[self.i] == '/':
+                self.i += 1
+                div = self.add()
+                if div == 0:
+                    raise ZeroDivisionError
+                out /= div
+            else:
+                break
+        return out
+
+    def add(self):
+        out = self.exp()
+        while self.i < len(self.ex):
+            if self.ex[self.i] == '+':
+                self.i += 1
+                out += self.exp()
+            elif self.ex[self.i] == '-':
+                self.i += 1
+                out -= self.exp()
+            else:
+                break
+        return out
+
+    def exp(self):
+        out = self.n()
+        while self.i < len(self.ex) and self.ex[self.i] == '^':
+            self.i += 1
+            out **= self.n()
+        return out
 
     def n(self):
         sgn = False
@@ -18,7 +54,7 @@ class Calc:
             
         if self.ex[self.i] == '(':
             self.i += 1
-            out = None # TODO
+            out = self.mul()
             self.i += 1
             return -out if sgn else out
         
@@ -38,4 +74,5 @@ if __name__ == '__main__':
             out = calc.pse()
             print(out)
         except KeyboardInterrupt:
+            # Ctrl-C to exit
             exit()
