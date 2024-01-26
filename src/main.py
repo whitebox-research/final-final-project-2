@@ -1,78 +1,79 @@
-class Calc:
-    def __init__(self, ex):
-        self.ex = ex.replace(' ', '')
-        self.i = 0
+class Calculator:
+    def __init__(self, equation):
+        self.equation = equation.replace(' ', '')
+        self.index = 0
 
-    def pse(self):
+    def parse(self):
         try:
-            return self.mul()
+            return self.multiply()
         except Exception as e:
-            return f"invalid: {e}"
+            return f"Error: {e}"
 
-    def mul(self):
-        out = self.add()
-        while self.i < len(self.ex):
-            if self.ex[self.i] == '*':
-                self.i += 1
-                out *= self.add()
-            elif self.ex[self.i] == '/':
-                self.i += 1
-                div = self.add()
-                if div == 0:
-                    raise ZeroDivisionError
-                out /= div
+    def multiply(self):
+        result = self.add()
+        while self.index < len(self.equation):
+            if self.equation[self.index] == '*':
+                self.index += 1
+                result *= self.add()
+            elif self.equation[self.index] == '/':
+                self.index += 1
+                divisor = self.add()
+                if divisor == 0:
+                    raise ZeroDivisionError("Division by zero")
+                result /= divisor
             else:
                 break
-        return out
+        return result
 
     def add(self):
-        out = self.exp()
-        while self.i < len(self.ex):
-            if self.ex[self.i] == '+':
-                self.i += 1
-                out += self.exp()
-            elif self.ex[self.i] == '-':
-                self.i += 1
-                out -= self.exp()
+        result = self.exponentiate()
+        while self.index < len(self.equation):
+            if self.equation[self.index] == '+':
+                self.index += 1
+                result += self.exponentiate()
+            elif self.equation[self.index] == '-':
+                self.index += 1
+                result -= self.exponentiate()
             else:
                 break
-        return out
+        return result
 
-    def exp(self):
-        out = self.n()
-        while self.i < len(self.ex) and self.ex[self.i] == '^':
-            self.i += 1
-            out **= self.n()
-        return out
+    def exponentiate(self):
+        result = self.numeric()
+        while self.index < len(self.equation) and self.equation[self.index] == '^':
+            self.index += 1
+            result **= self.numeric()
+        return result
 
-    def n(self):
-        sgn = False
+    def numeric(self):
+        is_negative = False
 
-        if self.ex[self.i] == '-':
-            sgn = True
-            self.i += 1
-            
-        if self.ex[self.i] == '(':
-            self.i += 1
-            out = self.mul()
-            self.i += 1
-            return -out if sgn else out
-        
-        i_0 = self.i
-        while self.i < len(self.ex) and self.ex[self.i].isdigit():
-            self.i += 1
+        if self.equation[self.index] == '-':
+            is_negative = True
+            self.index += 1
 
-        n = float(self.ex[i_0:self.i])
-        return -n if sgn else n
+        if self.equation[self.index] == '(':
+            self.index += 1
+            result = self.multiply()
+            self.index += 1
+            return -result if is_negative else result
+
+        start_index = self.index
+        while self.index < len(self.equation) and self.equation[self.index].isdigit():
+            self.index += 1
+
+        number = float(self.equation[start_index:self.index])
+        return -number if is_negative else number
 
 
 if __name__ == '__main__':
     while True:
         try:
-            eq = input("> ")
-            calc = Calc(eq)
-            out = calc.pse()
-            print(out)
+            equation = input("> ")
+            calculator = Calculator(equation)
+            result = calculator.parse()
+            print(result)
         except KeyboardInterrupt:
-            # Ctrl-C to exit
             exit()
+        except Exception as e:
+            print(f"Error: {e}")
